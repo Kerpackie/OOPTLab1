@@ -31,6 +31,11 @@ jobs:
                   registry: ${{ env.DOCKER_REGISTRY }}
                   username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
+            - name: Debug Variables
+              run: |
+                    echo "CONTEXT_DIR: ${{ env.CONTEXT_DIR }}"
+                    echo "DOCKERFILE: ${{ env.DOCKERFILE }}"
+                    echo "BUILD_ARGS: $BUILD_ARGS"
             - name: Build and Push Release to DockerHub
               shell: bash
               run: ./build_and_push.sh
