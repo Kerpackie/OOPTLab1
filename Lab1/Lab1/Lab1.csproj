@@ -9,7 +9,7 @@
 		<Company>Megabit</Company>
 		<Description>
 			This is a Blazorise Template for a Blazor Server Application.
-			Blazorise is a component library built on top of Blazor and CSS frameworks like Bootstrap, Tailwind, Bulma and Material.
+			Blazorise is a component library built on top of Blazor and CSS frameworks like Bootstrap, Tailwind, Bulma, and Material.
 		</Description>
 		<Copyright>Copyright 2018-2023 Megabit</Copyright>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
@@ -23,27 +23,21 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Blazorise"					Version="1.3.*" />
-		<PackageReference Include="Blazorise.Bootstrap5"		Version="1.3.*" />
+		<PackageReference Include="Blazorise" Version="1.3.*" />
+		<PackageReference Include="Blazorise.Bootstrap5" Version="1.3.*" />
 		<PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.3.*" />
-		<PackageReference Include="Blazorise.DataGrid"			Version="1.3.*" />
+		<PackageReference Include="Blazorise.DataGrid" Version="1.3.*" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <_ContentIncludedByDefault Remove="Components\TodoApp\TodoItem.razor" />
-	  <_ContentIncludedByDefault Remove="Components\TodoApp\TodoItems.razor" />
+		<_ContentIncludedByDefault Remove="Components\TodoApp\TodoItem.razor" />
+		<_ContentIncludedByDefault Remove="Components\TodoApp\TodoItems.razor" />
+	</ItemGroup>
 
 	<ItemGroup>
-	  <Content Include="..\..\.dockerignore">
-	    <Link>.dockerignore</Link>
-	  </Content>
+		<Content Include="..\..\.dockerignore">
+			<Link>.dockerignore</Link>
+		</Content>
 	</ItemGroup>
-
-	</ItemGroup>
-
-
-
-
-
 
 </Project>
