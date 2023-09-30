@@ -1,4 +1,4 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
@@ -6,10 +6,10 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 # Update the path to the .csproj file when Dockerfile is in the root directory
-COPY ["Lab1/Lab1.csproj", "Lab1/"]
-RUN dotnet restore "Lab1/Lab1.csproj"
+COPY ["Lab1/Lab1/Lab1.csproj", "Lab1/Lab1/"]
+RUN dotnet restore "Lab1/Lab1/Lab1.csproj"
 COPY . .
-WORKDIR "/src/Lab1"
+WORKDIR "/src/Lab1/Lab1"
 RUN dotnet build "Lab1.csproj" -c Release -o /app/build
 
 FROM build AS publish
