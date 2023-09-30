@@ -1,24 +1,24 @@
-name: Build and Deploy
+name: Deploy to staging
 
 env:
-    CONTEXT_DIR: 'Lab1/Lab1/' 
-    IMAGE_NAME: ${{ github.repository }}
+    CONTEXT_DIR: 'Lab1/Lab1/'
+    IMAGE_NAME: ${{ github.repository }}/staging
     DOCKERFILE: Dockerfile
     CAPROVER_APP: myapp-staging
     DOCKER_REGISTRY: ghcr.io
 
 on:
-    pull_request:
-      branches: [ "master" ]
-
-  # Allows you to run this workflow manually from the Actions tab
-    workflow_dispatch:
+    push:
+        branches:
+            - main
 
 jobs:
     build-and-publish:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v1
+            - name: Grant execute permission to build_and_push.sh
+              run: chmod +x build_and_push.sh
             - run: |
                   echo "IMAGE_NAME_WITH_REGISTRY=$DOCKER_REGISTRY/$IMAGE_NAME" >> $GITHUB_ENV
                   export IMAGE_NAME_WITH_REGISTRY=$DOCKER_REGISTRY/$IMAGE_NAME
