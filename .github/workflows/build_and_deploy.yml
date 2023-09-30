@@ -1,7 +1,7 @@
 name: Deploy to staging
 
 env:
-    CONTEXT_DIR: .
+    CONTEXT_DIR: 'Lab1/Lab1/'
     IMAGE_NAME: ootplabencoder
     DOCKERFILE: Dockerfile
     CAPROVER_APP: myapp-staging
