@@ -1,0 +1,124 @@
+﻿@using Microsoft.Extensions.Caching.Memory
+@using Lab1.Data.Models
+@inject IMemoryCache MemoryCache
+@inject IJSRuntime JSRuntime
+
+<Row>
+    <!-- First Card - Input Form -->
+    <Column ColumnSize="ColumnSize.Is6.OnDesktop">
+        <Card Margin="Margin.Is4.FromBottom">
+            <CardHeader>
+                <CardTitle>Message</CardTitle>
+            </CardHeader>
+            <CardBody>
+                <Field>
+                    <FieldLabel>Message to be encoded</FieldLabel>
+                    <TextEdit id="OriginalMessage" @bind-Text="@messageModel.OriginalMessage" Placeholder="Enter message" />
+                    <FieldHelp>Encoded message and cipher will be shown after submission.</FieldHelp>
+                </Field>
+                <Button Color="Color.Primary" Clicked="EncodeMessage">Submit</Button>
+            </CardBody>
+        </Card>
+    </Column>
+    <!-- Second Card - Display Encoded Message and Key -->
+    <Column ColumnSize="ColumnSize.Is6.OnDesktop">
+        <Card Margin="Margin.Is4.FromBottom">
+            <CardHeader>
+                <CardTitle>Encoded Message</CardTitle>
+            </CardHeader>
+            <CardBody>
+                @if (!string.IsNullOrEmpty(encodedMessage) && !string.IsNullOrEmpty(key))
+                {
+                    <Field>
+                        <FieldLabel>Encoded Message</FieldLabel>
+                        <TextEdit ReadOnly="true" Placeholder="@encodedMessage" 
+                                  @onclick = '() => CopyText(encodedMessage, "Encoded message copied to clipboard.")'/>
+                        <FieldHelp>Click field to copy encrypted message to clipboard.</FieldHelp>
+                    </Field>
+                    <Field>
+                        <FieldLabel>Message Cipher</FieldLabel>
+                        <TextEdit ReadOnly="true" Placeholder="@key" 
+                                  @onclick='() => CopyText(key, "Message Cipher copied to clipboard.")' />
+                        <FieldHelp>Click field to copy cipher to clipboard.</FieldHelp>
+                    </Field>
+                }
+                else
+                {
+                    <Field>
+                        <FieldLabel>Encoded Message</FieldLabel>
+                        <TextEdit ReadOnly="true" Placeholder="" />
+                    </Field>
+                    <Field>
+                        <FieldLabel>Message Cipher</FieldLabel>
+                        <TextEdit ReadOnly="true" Placeholder="" />
+                    </Field>
+                }
+            </CardBody>
+        </Card>
+    </Column>
+</Row>
+
+<Snackbar @ref="snackbar" Color="SnackbarColor.Success">
+  <SnackbarBody>
+    @snackbarMessage
+    <SnackbarAction Clicked="@(()=>snackbar.Hide())"></SnackbarAction>
+  </SnackbarBody>
+</Snackbar>
+ 
+@code {
+    private Snackbar snackbar;
+    private string snackbarMessage;
+    
+    private class MessageModel
+    {
+        public string OriginalMessage { get; set; }
+    }
+ 
+    [Parameter] public string TextToCopy { get; set; }
+    
+    private MessageModel messageModel = new();
+    private string encodedMessage;
+    private string key;
+ 
+    private void EncodeMessage()
+    {
+        Console.WriteLine("EncodeMessage method called"); // Add this line for debugging
+ 
+        if (!string.IsNullOrEmpty(messageModel.OriginalMessage))
+        {
+            var message = new EncodedMessage(messageModel.OriginalMessage);
+            encodedMessage = message.Message;
+            key = message.Key;
+ 
+            Console.WriteLine(encodedMessage);
+            Console.WriteLine(key);
+ 
+            // Store the message and key in memory cache
+            MemoryCache.Set("EncodedMessage", encodedMessage);
+            MemoryCache.Set("Key", key);
+        }
+        else
+        {
+            Console.WriteLine("We got null values in here.");
+            encodedMessage = null;
+            key = null;
+        }
+    }
+ 
+    protected override void OnInitialized()
+    {
+        // Retrieve the stored message and key from memory cache, if available
+        encodedMessage = MemoryCache.TryGetValue("EncodedMessage", out string encoded) ? encoded : null;
+        key = MemoryCache.TryGetValue("Key", out string k) ? k : null;
+    }
+ 
+    private async Task CopyText(string textToCopy, string notificationMessage = "Copied to clipboard!")
+    {
+    // Use JavaScript interop to copy the text to the clipboard
+        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", textToCopy);
+        
+        // Show the snackbar
+        snackbarMessage = notificationMessage;
+        snackbar.Show();
+    }
+}
