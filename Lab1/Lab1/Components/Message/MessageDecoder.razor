@@ -15,25 +15,25 @@
                 {
                     <Field>
                         <FieldLabel>Encoded message to be decoded</FieldLabel>
-                        <TextEdit Placeholder="@encodedMessage" />
-                        <FieldHelp>Encoded message and cipher will be shown after submission.</FieldHelp>
+                        <TextEdit Text="@encodedMessage" TextChanged="@OnMessageChanged"/>
+                        <FieldHelp>Decoded message will be shown after submission.</FieldHelp>
                     </Field>
                     <Field>
                         <FieldLabel>Message Cipher</FieldLabel>
-                        <TextEdit ReadOnly="true" Placeholder="@key" />
-                        <FieldHelp>Encoded message and cipher will be shown after submission.</FieldHelp>
+                        <TextEdit Text="@key" TextChanged="@OnKeyChanged"/>
+                        <FieldHelp>Warning: No error trapping for incorrect cipher.</FieldHelp>
                     </Field>
                 }
                 else
                 {
                     <Field>
                         <FieldLabel>Encoded message to be decoded</FieldLabel>
-                        <TextEdit />
+                        <TextEdit Text="@encodedMessage" TextChanged="@OnMessageChanged"/>
                         <FieldHelp>Encoded message and cipher will be shown after submission.</FieldHelp>
                     </Field>
                     <Field>
                         <FieldLabel>Message Cipher</FieldLabel>
-                        <TextEdit />
+                        <TextEdit Text="@key" TextChanged="@OnKeyChanged"/>
                         <FieldHelp>Encoded message and cipher will be shown after submission.</FieldHelp>
                     </Field>
                 }
@@ -49,7 +49,7 @@
             <CardBody>
                 <Field>
                     <FieldLabel>Decoded Message</FieldLabel>
-                    <TextEdit ReadOnly="true" Placeholder="@decodedMessage" 
+                    <TextEdit ReadOnly="true" Text="@decodedMessage" 
                               @onclick = '() => CopyText(encodedMessage, "Decoded message copied to clipboard.")'/>
                     <FieldHelp>Click to copy message to clipboard.</FieldHelp>
                 </Field>
@@ -80,21 +80,24 @@
 
     private void DecodeMessage()
     {
-        Console.WriteLine("DecodeMessage method called"); // Add this line for debugging
- 
+        Console.WriteLine("DecodeMessage method called");
+    
         if (!string.IsNullOrEmpty(encodedMessage) && !string.IsNullOrEmpty(key))
         {
             var message = new EncodedMessage(encodedMessage, key);
             decodedMessage = message.DecodeMessage();
- 
+
             // Store the message and key in memory cache
             MemoryCache.Set("DecodedMessage", decodedMessage);
+
+            Console.WriteLine($"Decoded Message: {decodedMessage}");
         }
         else
         {
             decodedMessage = null;
         }
     }
+
  
     protected override void OnInitialized()
     {
@@ -112,4 +115,19 @@
         snackbarMessage = notificationMessage;
         await snackbar.Show();
     }
+
+    private Task OnMessageChanged(string arg)
+    {
+        encodedMessage = arg;
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnKeyChanged(string arg)
+    {
+        key = arg;
+
+        return Task.CompletedTask;
+    }
+
 }
