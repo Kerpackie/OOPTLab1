@@ -1,0 +1,115 @@
+﻿@using Microsoft.Extensions.Caching.Memory
+@using Lab1.Data.Models
+@using Lab1.Extensions
+@inject IMemoryCache MemoryCache
+@inject IJSRuntime JSRuntime
+
+<Row>
+    <Column ColumnSize="ColumnSize.Is6.OnDesktop">
+        <Card Margin="Margin.Is4.FromBottom">
+            <CardHeader>
+                <CardTitle>Encoded Message</CardTitle>
+            </CardHeader>
+            <CardBody>
+                @if (!string.IsNullOrEmpty(encodedMessage) && !string.IsNullOrEmpty(key))
+                {
+                    <Field>
+                        <FieldLabel>Encoded message to be decoded</FieldLabel>
+                        <TextEdit Placeholder="@encodedMessage" />
+                        <FieldHelp>Encoded message and cipher will be shown after submission.</FieldHelp>
+                    </Field>
+                    <Field>
+                        <FieldLabel>Message Cipher</FieldLabel>
+                        <TextEdit ReadOnly="true" Placeholder="@key" />
+                        <FieldHelp>Encoded message and cipher will be shown after submission.</FieldHelp>
+                    </Field>
+                }
+                else
+                {
+                    <Field>
+                        <FieldLabel>Encoded message to be decoded</FieldLabel>
+                        <TextEdit />
+                        <FieldHelp>Encoded message and cipher will be shown after submission.</FieldHelp>
+                    </Field>
+                    <Field>
+                        <FieldLabel>Message Cipher</FieldLabel>
+                        <TextEdit />
+                        <FieldHelp>Encoded message and cipher will be shown after submission.</FieldHelp>
+                    </Field>
+                }
+                <Button Color="Color.Primary" Clicked="DecodeMessage">Submit</Button>
+            </CardBody>
+        </Card>
+    </Column>
+    <Column ColumnSize="ColumnSize.Is6.OnDesktop">
+        <Card Margin="Margin.Is4.FromBottom">
+            <CardHeader>
+                <CardTitle>Decoded Message</CardTitle>
+            </CardHeader>
+            <CardBody>
+                <Field>
+                    <FieldLabel>Decoded Message</FieldLabel>
+                    <TextEdit ReadOnly="true" Placeholder="@decodedMessage" 
+                              @onclick = '() => CopyText(encodedMessage, "Decoded message copied to clipboard.")'/>
+                    <FieldHelp>Click to copy message to clipboard.</FieldHelp>
+                </Field>
+            </CardBody>
+        </Card>
+    </Column>
+</Row>
+
+
+<Snackbar @ref="snackbar" Color="SnackbarColor.Success">
+  <SnackbarBody>
+    @snackbarMessage
+    <SnackbarAction Clicked="@(()=>snackbar.Hide())"></SnackbarAction>
+  </SnackbarBody>
+</Snackbar>
+ 
+@code {
+    private Snackbar snackbar;
+    private string snackbarMessage;
+    
+    
+    [Parameter] public string TextToCopy { get; set; }
+    
+    private EncodedMessage message;
+    private string encodedMessage;
+    private string key;
+    private string decodedMessage;
+
+    private void DecodeMessage()
+    {
+        Console.WriteLine("DecodeMessage method called"); // Add this line for debugging
+ 
+        if (!string.IsNullOrEmpty(encodedMessage) && !string.IsNullOrEmpty(key))
+        {
+            var message = new EncodedMessage(encodedMessage, key);
+            decodedMessage = message.DecodeMessage();
+ 
+            // Store the message and key in memory cache
+            MemoryCache.Set("DecodedMessage", decodedMessage);
+        }
+        else
+        {
+            decodedMessage = null;
+        }
+    }
+ 
+    protected override void OnInitialized()
+    {
+        // Retrieve the stored message and key from memory cache, if available
+        encodedMessage = MemoryCache.TryGetValue("EncodedMessage", out string encoded) ? encoded : null;
+        key = MemoryCache.TryGetValue("Key", out string k) ? k : null;
+    }
+ 
+    private async Task CopyText(string textToCopy, string notificationMessage = "Copied to clipboard!")
+    {
+    // Use JavaScript interop to copy the text to the clipboard
+        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", textToCopy);
+        
+        // Show the snackbar
+        snackbarMessage = notificationMessage;
+        await snackbar.Show();
+    }
+}
