@@ -12,6 +12,7 @@
 			Blazorise is a component library built on top of Blazor and CSS frameworks like Bootstrap, Tailwind, Bulma and Material.
 		</Description>
 		<Copyright>Copyright 2018-2023 Megabit</Copyright>
+		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -31,6 +32,12 @@
 	<ItemGroup>
 	  <_ContentIncludedByDefault Remove="Components\TodoApp\TodoItem.razor" />
 	  <_ContentIncludedByDefault Remove="Components\TodoApp\TodoItems.razor" />
+
+	<ItemGroup>
+	  <Content Include="..\..\.dockerignore">
+	    <Link>.dockerignore</Link>
+	  </Content>
+	</ItemGroup>
 
 	</ItemGroup>
 
