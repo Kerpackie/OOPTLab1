@@ -1,0 +1,48 @@
+name: Deploy to staging
+
+env:
+    CONTEXT_DIR: 'Lab1/Lab1/'
+    IMAGE_NAME: ootplabencoder
+    DOCKERFILE: Dockerfile
+    CAPROVER_APP: myapp-staging
+    DOCKER_REGISTRY: ghcr.io
+
+on:
+    pull_request:
+        branches: [ "master" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+    workflow_dispatch:
+
+jobs:
+    build-and-publish:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v1
+            - name: Grant execute permission to build_and_push.sh
+              run: chmod +x build_and_push.sh
+            - run: |
+                  echo "IMAGE_NAME_WITH_REGISTRY=$DOCKER_REGISTRY/$IMAGE_NAME" >> $GITHUB_ENV
+                  export IMAGE_NAME_WITH_REGISTRY=$DOCKER_REGISTRY/$IMAGE_NAME
+                  echo "FULL_IMAGE_NAME=$IMAGE_NAME_WITH_REGISTRY:$GITHUB_SHA-gitsha" >> $GITHUB_ENV
+            - name: Log in to the Container registry
+              uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+              with:
+                  registry: ${{ env.DOCKER_REGISTRY }}
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+            - name: Debug Variables
+              run: |
+                    echo "CONTEXT_DIR: ${{ env.CONTEXT_DIR }}"
+                    echo "DOCKERFILE: ${{ env.DOCKERFILE }}"
+                    echo "BUILD_ARGS: $BUILD_ARGS"
+            - name: Build and Push Release to DockerHub
+              shell: bash
+              run: ./build_and_push.sh
+            - name: Deploy to CapRover
+              uses: caprover/deploy-from-github@d76580d79952f6841c453bb3ed37ef452b19752c
+              with:
+                  server: ${{ secrets.CAPROVER_HOST }}
+                  app: ${{ env.CAPROVER_APP }}
+                  token: '${{ secrets.CAPROVER_APP_TOKEN }}'
+                  image: '${{ env.FULL_IMAGE_NAME }}'
