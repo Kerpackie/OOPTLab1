@@ -10,7 +10,7 @@ env > /tmp/build_args
 # Format the build arguments
 BUILD_ARGS=$(cat /tmp/build_args | sed -z 's/\n/ --build-arg /g')
 
-# Build and tag the Docker image
+# Build and tag the Docker image with the current directory as the build context
 docker buildx build -t $FULL_IMAGE_NAME -t $IMAGE_NAME_WITH_REGISTRY:latest -f $DOCKERFILE --build-arg $BUILD_ARGS --no-cache .
 
 # Push the Docker images
