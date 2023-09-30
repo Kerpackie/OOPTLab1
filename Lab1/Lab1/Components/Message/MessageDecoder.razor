@@ -59,7 +59,7 @@
 </Row>
 
 
-<Snackbar @ref="snackbar" Color="SnackbarColor.Success">
+<Snackbar @ref="snackbar">
   <SnackbarBody>
     @snackbarMessage
     <SnackbarAction Clicked="@(()=>snackbar.Hide())"></SnackbarAction>
@@ -80,24 +80,31 @@
 
     private void DecodeMessage()
     {
-        Console.WriteLine("DecodeMessage method called");
-    
         if (!string.IsNullOrEmpty(encodedMessage) && !string.IsNullOrEmpty(key))
         {
             var message = new EncodedMessage(encodedMessage, key);
-            decodedMessage = message.DecodeMessage();
+            try
+            {
+                decodedMessage = message.DecodeMessage();
 
-            // Store the message and key in memory cache
-            MemoryCache.Set("DecodedMessage", decodedMessage);
-
-            Console.WriteLine($"Decoded Message: {decodedMessage}");
+    // Store the message and key in memory cache
+                MemoryCache.Set("DecodedMessage", decodedMessage);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                decodedMessage = "";
+                
+                snackbarMessage = "Error: Could not decode message.";
+                snackbar.Color = SnackbarColor.Danger;
+                snackbar.Show();
+            }
         }
         else
         {
             decodedMessage = null;
         }
     }
-
  
     protected override void OnInitialized()
     {
@@ -113,6 +120,7 @@
         
         // Show the snackbar
         snackbarMessage = notificationMessage;
+        snackbar.Color = SnackbarColor.Success;
         await snackbar.Show();
     }
 
