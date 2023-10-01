@@ -17,4 +17,8 @@ RUN dotnet publish "Lab1.csproj" -c Release -o /app/publish /p:UseAppHost=false
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Lab1.dll"]
+
+FROM nginx:alpine
+WORKDIR /var/www/web
+COPY --from=build-env /app/output/wwwroot .
+COPY nginx.conf /etc/nginx/nginx.conf
