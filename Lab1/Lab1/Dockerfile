@@ -1,24 +1,10 @@
-FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS build-env
 WORKDIR /app
-EXPOSE 80
-EXPOSE 443
-
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
-WORKDIR /src
-COPY ["Lab1/Lab1/Lab1.csproj", "Lab1/Lab1/"]
-RUN dotnet restore "Lab1/Lab1/Lab1.csproj"
-COPY . .
-WORKDIR "/src/Lab1/Lab1"
-RUN dotnet build "Lab1.csproj" -c Release -o /app/build
-
-FROM build AS publish
-RUN dotnet publish "Lab1.csproj" -c Release -o /app/publish /p:UseAppHost=false
-
-FROM base AS final
-WORKDIR /app
-COPY --from=publish /app/publish .
+COPY . ./
+RUN dotnet publish -c Release -o output
 
 FROM nginx:alpine
 WORKDIR /var/www/web
 COPY --from=build-env /app/output/wwwroot .
 COPY nginx.conf /etc/nginx/nginx.conf
+EXPOSE 80
